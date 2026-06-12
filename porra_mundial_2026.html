@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Porra Mundial 2026</title>
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #F5E6B8;
+    --gold-dark: #7A5F1A;
+    --green-field: #1A6B3C;
+    --green-dark: #0E3D22;
+    --bg: #0B1A12;
+    --surface: #12241A;
+    --surface2: #1A3025;
+    --text: #F0EDE4;
+    --text-muted: #8A9E90;
+    --border: rgba(201,168,76,0.18);
+    --border-strong: rgba(201,168,76,0.35);
+    --red: #E05252;
+    --blue: #4A9EE0;
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+  a { color: var(--gold); text-decoration: none; }
+
+  /* NAV */
+  nav {
+    background: var(--surface);
+    border-bottom: 0.5px solid var(--border-strong);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-brand {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: -0.3px;
+    margin-right: 32px;
+    white-space: nowrap;
+  }
+  .nav-tabs {
+    display: flex;
+    gap: 0;
+    height: 100%;
+    flex: 1;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .nav-tab {
+    padding: 0 18px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+    user-select: none;
+  }
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+  .last-update {
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    margin-left: auto;
+    padding-left: 16px;
+  }
+  .dot-live {
+    width: 6px; height: 6px;
+    background: #4CAF50;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 5px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* MAIN */
+  main { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* HERO RANKING */
+  .hero {
+    background: var(--surface);
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius-lg);
+    padding: 24px 28px;
+    margin-bottom: 24px;
+  }
+  .hero-title {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 20px;
+  }
+  .podium {
+    display: grid;
+    grid-template-columns: 1fr 1.15fr 1fr;
+    gap: 12px;
+    align-items: end;
+    margin-bottom: 8px;
+  }
+  .podium-place {
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 12px;
+    text-align: center;
+  }
+  .podium-place.first {
+    border-color: var(--gold);
+    background: linear-gradient(180deg, rgba(201,168,76,0.08) 0%, var(--surface2) 100%);
+    padding-top: 24px;
+  }
+  .podium-place.second { order: -1; }
+  .medal { font-size: 22px; margin-bottom: 6px; }
+  .podium-alias { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .podium-pts { font-size: 22px; font-weight: 700; color: var(--gold); }
+  .podium-pts-label { font-size: 11px; color: var(--text-muted); }
+
+  /* TABLA */
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .card-header {
+    padding: 16px 20px;
+    border-bottom: 0.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+  .card-subtitle { font-size: 12px; color: var(--text-muted); }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    padding: 10px 16px;
+    text-align: left;
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    border-bottom: 0.5px solid var(--border);
+    background: var(--surface);
+    font-weight: 500;
+  }
+  th.num { text-align: right; }
+  td {
+    padding: 11px 16px;
+    font-size: 13px;
+    color: var(--text);
+    border-bottom: 0.5px solid var(--border);
+  }
+  td.num { text-align: right; color: var(--gold); font-weight: 500; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(201,168,76,0.04); }
+  .rank-num { color: var(--text-muted); font-size: 12px; }
+  .rank-1 { color: var(--gold); font-weight: 700; }
+  .rank-2 { color: #C0C0C0; font-weight: 600; }
+  .rank-3 { color: #CD7F32; font-weight: 600; }
+  .alias-cell { font-weight: 500; }
+  .delta {
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 99px;
+  }
+  .delta.up { background: rgba(76,175,80,0.12); color: #4CAF50; }
+  .delta.down { background: rgba(224,82,82,0.12); color: var(--red); }
+  .delta.eq { background: rgba(138,158,144,0.1); color: var(--text-muted); }
+  .badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-weight: 500;
+  }
+  .badge-paid { background: rgba(76,175,80,0.12); color: #4CAF50; }
+  .badge-pend { background: rgba(224,82,82,0.1); color: var(--red); }
+  .badge-elim { background: rgba(224,82,82,0.1); color: var(--red); }
+  .badge-vivo { background: rgba(76,175,80,0.12); color: #4CAF50; }
+  .badge-camp { background: rgba(201,168,76,0.15); color: var(--gold); }
+
+  /* STATS CARDS */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .stat-label { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-val { font-size: 26px; font-weight: 700; color: var(--gold); }
+  .stat-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  /* PARTIDOS */
+  .match-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 16px;
+  }
+  .match-team { font-size: 14px; font-weight: 600; }
+  .match-team.home { text-align: right; }
+  .match-team.away { text-align: left; }
+  .match-score {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gold);
+    text-align: center;
+    min-width: 60px;
+  }
+  .match-score.pending { font-size: 16px; color: var(--text-muted); }
+  .match-meta {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  .match-special {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.04);
+  }
+  .special-tag {
+    font-size: 10px;
+    background: rgba(201,168,76,0.15);
+    color: var(--gold);
+    padding: 2px 8px;
+    border-radius: 99px;
+    margin-bottom: 10px;
+    display: inline-block;
+  }
+  .match-wrapper { margin-bottom: 4px; }
+
+  /* JUGADORES */
+  .player-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .player-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+  }
+  .player-card.leyenda { border-color: var(--gold); }
+  .player-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .player-cat { font-size: 11px; color: var(--text-muted); margin-bottom: 12px; }
+  .player-stat-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    padding: 3px 0;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .player-stat-row:last-child { border-bottom: none; }
+  .player-stat-label { color: var(--text-muted); }
+  .player-total { font-size: 18px; font-weight: 700; color: var(--gold); margin-top: 10px; }
+  .player-total-label { font-size: 11px; color: var(--text-muted); }
+
+  /* PICKS DETAIL */
+  .picks-filter {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .picks-filter button {
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: 99px;
+    padding: 5px 14px;
+    font-size: 12px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .picks-filter button.active, .picks-filter button:hover {
+    background: rgba(201,168,76,0.12);
+    color: var(--gold);
+    border-color: var(--border-strong);
+  }
+  .block-header {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    padding: 10px 16px 8px;
+    background: var(--surface2);
+    border-bottom: 0.5px solid var(--border);
+  }
+
+  /* MODAL-LIKE DETAIL */
+  .detail-panel {
+    background: var(--surface2);
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-top: 8px;
+    display: none;
+  }
+  .detail-panel.open { display: block; }
+
+  /* ADMIN */
+  .form-group { margin-bottom: 16px; }
+  label.form-label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  input, select {
+    background: var(--surface2);
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius);
+    color: var(--text);
+    padding: 9px 12px;
+    font-size: 13px;
+    width: 100%;
+    outline: none;
+  }
+  input:focus, select:focus { border-color: var(--gold); }
+  select option { background: var(--surface2); }
+  .btn {
+    background: rgba(201,168,76,0.12);
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius);
+    color: var(--gold);
+    padding: 9px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn:hover { background: rgba(201,168,76,0.22); }
+  .btn-danger {
+    background: rgba(224,82,82,0.08);
+    border-color: rgba(224,82,82,0.3);
+    color: var(--red);
+  }
+  .btn-danger:hover { background: rgba(224,82,82,0.16); }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media (max-width: 600px) {
+    .two-col, .three-col { grid-template-columns: 1fr; }
+    .podium { grid-template-columns: 1fr; }
+    .podium-place.second { order: 0; }
+  }
+  .section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+  .empty-state .icon { font-size: 32px; margin-bottom: 10px; opacity: 0.4; }
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--surface);
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius);
+    padding: 12px 18px;
+    font-size: 13px;
+    color: var(--text);
+    z-index: 999;
+    display: none;
+    max-width: 300px;
+  }
+  .toast.show { display: block; }
+  .pct-bar {
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-top: 6px;
+  }
+  .pct-fill {
+    height: 100%;
+    background: var(--gold);
+    border-radius: 99px;
+    transition: width 0.5s ease;
+  }
+  .tier-label {
+    display: inline-block;
+    font-size: 10px;
+    padding: 1px 7px;
+    border-radius: 99px;
+    font-weight: 500;
+    margin-left: 6px;
+  }
+  .tier-fav { background: rgba(201,168,76,0.15); color: var(--gold); }
+  .tier-asp { background: rgba(74,158,224,0.12); color: var(--blue); }
+  .tier-sor { background: rgba(76,175,80,0.12); color: #4CAF50; }
+  .tier-afr { background: rgba(224,82,82,0.1); color: var(--red); }
+  .tier-res { background: rgba(138,158,144,0.12); color: var(--text-muted); }
+  .tier-cen { background: rgba(201,168,76,0.08); color: var(--gold-dark); }
+
+  .scoring-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 8px;
+  }
+  .scoring-item {
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+  }
+  .scoring-pts { font-weight: 700; color: var(--gold); }
+  .scoring-pts.neg { color: var(--red); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">⚽ Mundial 2026</div>
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="showTab('ranking')">Ranking</div>
+    <div class="nav-tab" onclick="showTab('partidos')">Partidos</div>
+    <div class="nav-tab" onclick="showTab('equipos')">Equipos</div>
+    <div class="nav-tab" onclick="showTab('jugadores')">Jugadores</div>
+    <div class="nav-tab" onclick="showTab('picks')">Picks</div>
+    <div class="nav-tab" onclick="showTab('reglas')">Reglas</div>
+    <div class="nav-tab" onclick="showTab('admin')">Admin</div>
+  </div>
+  <div class="last-update"><span class="dot-live"></span><span id="last-update-text">Actualizado ahora</span></div>
+</nav>
+
+<main>
+
+<!-- ===== RANKING ===== -->
+<div id="sec-ranking" class="section active">
+  <div class="stats-grid" id="stats-grid"></div>
+  <div class="hero" id="podium-container">
+    <div class="hero-title">Clasificación — Fase de grupos</div>
+    <div class="podium" id="podium"></div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Clasificación completa</div>
+        <div class="card-subtitle" id="ranking-subtitle"></div>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:40px">#</th>
+          <th>Participante</th>
+          <th class="num">Equipos</th>
+          <th class="num">Jugadores</th>
+          <th class="num">Pronósticos</th>
+          <th class="num">Total</th>
+          <th class="num">Var.</th>
+        </tr>
+      </thead>
+      <tbody id="ranking-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== PARTIDOS ===== -->
+<div id="sec-partidos" class="section">
+  <p class="section-title">Partidos del torneo</p>
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-header">
+      <div class="card-title">Partidos especiales</div>
+      <div class="card-subtitle">Resultado exacto +5 · Ganador/empate +2</div>
+    </div>
+    <div style="padding:16px" id="special-matches"></div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Todos los partidos</div>
+      <div class="card-subtitle">Los goles afectan las puntuaciones de equipos y jugadores</div>
+    </div>
+    <div style="padding:16px" id="all-matches">
+      <div class="empty-state"><div class="icon">📅</div>Los partidos del torneo se añadirán cuando empiece la competición</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== EQUIPOS ===== -->
+<div id="sec-equipos" class="section">
+  <p class="section-title">Estado de los equipos elegidos</p>
+  <div class="stats-grid" id="team-stats"></div>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Equipos por participante</div>
+      <div class="card-subtitle">Ordenados por puntuación acumulada</div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Participante</th>
+          <th>Favoritos</th>
+          <th>Aspirantes</th>
+          <th>Sorpresas</th>
+          <th>Africanos</th>
+          <th>Resto 1</th>
+          <th>Resto 2</th>
+          <th>Cenicientas</th>
+          <th class="num">Pts</th>
+        </tr>
+      </thead>
+      <tbody id="teams-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== JUGADORES ===== -->
+<div id="sec-jugadores" class="section">
+  <p class="section-title">Rendimiento de jugadores</p>
+  <div id="player-panels"></div>
+</div>
+
+<!-- ===== PICKS ===== -->
+<div id="sec-picks" class="section">
+  <p class="section-title">Elecciones de los participantes</p>
+  <div class="picks-filter" id="picks-filter">
+    <button class="active" onclick="filterPicks('all', this)">Todos</button>
+    <button onclick="filterPicks('Favoritos', this)">Favoritos</button>
+    <button onclick="filterPicks('Aspirantes', this)">Aspirantes</button>
+    <button onclick="filterPicks('Sorpresas', this)">Sorpresas</button>
+    <button onclick="filterPicks('Africanos', this)">Africanos</button>
+    <button onclick="filterPicks('Resto 1', this)">Resto 1</button>
+    <button onclick="filterPicks('Resto 2', this)">Resto 2</button>
+    <button onclick="filterPicks('Cenicientas', this)">Cenicientas</button>
+    <button onclick="filterPicks('jugadores', this)">Jugadores</button>
+    <button onclick="filterPicks('pronosticos', this)">Pronósticos</button>
+  </div>
+  <div id="picks-content"></div>
+</div>
+
+<!-- ===== REGLAS ===== -->
+<div id="sec-reglas" class="section">
+  <p class="section-title">Bases de la porra</p>
+  <div class="card" style="padding:20px 24px">
+    <div style="margin-bottom:24px">
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;text-transform:uppercase;letter-spacing:.6px">Puntuación por equipos</p>
+      <div class="scoring-grid" id="scoring-teams"></div>
+    </div>
+    <div style="margin-bottom:24px">
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;text-transform:uppercase;letter-spacing:.6px">Puntuación por jugadores (fase de grupos)</p>
+      <div class="scoring-grid" id="scoring-players"></div>
+    </div>
+    <div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;text-transform:uppercase;letter-spacing:.6px">Partidos especiales</p>
+      <div class="scoring-grid" id="scoring-special"></div>
+    </div>
+    <div style="margin-top:20px;padding-top:20px;border-top:0.5px solid var(--border)">
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.6px">Categorías de picks</p>
+      <p style="font-size:13px;color:var(--text-muted);line-height:1.8">
+        Cada participante elige <strong style="color:var(--text)">2 equipos por categoría</strong>: Favoritos, Aspirantes, Sorpresas, Africanos, Resto 1, Resto 2 y Cenicientas.<br>
+        Y <strong style="color:var(--text)">1 jugador por categoría</strong>: Leyenda, Jugones y Asiáticos.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADMIN ===== -->
+<div id="sec-admin" class="section">
+  <p class="section-title">Panel de administración</p>
+  <div class="two-col">
+
+    <div>
+      <div class="card" style="padding:20px;margin-bottom:16px">
+        <div class="card-title" style="margin-bottom:16px">Actualizar resultado de partido</div>
+        <div class="form-group">
+          <label class="form-label">Partido</label>
+          <select id="admin-match-id" onchange="fillMatchTeams()">
+            <option value="">— Seleccionar partido —</option>
+          </select>
+        </div>
+        <div class="two-col">
+          <div class="form-group">
+            <label class="form-label" id="admin-team-a-label">Equipo A</label>
+            <input type="number" id="admin-goals-a" min="0" placeholder="Goles" oninput="previewMatchPoints()">
+          </div>
+          <div class="form-group">
+            <label class="form-label" id="admin-team-b-label">Equipo B</label>
+            <input type="number" id="admin-goals-b" min="0" placeholder="Goles" oninput="previewMatchPoints()">
+          </div>
+        </div>
+        <div id="match-preview" style="display:none;background:var(--surface2);border-radius:var(--radius);padding:12px;margin-bottom:12px;font-size:13px;color:var(--text-muted)"></div>
+        <button class="btn" onclick="saveMatchResult()">Guardar resultado</button>
+      </div>
+
+      <div class="card" style="padding:20px;margin-bottom:16px">
+        <div class="card-title" style="margin-bottom:16px">Avance de equipo en el torneo</div>
+        <div class="form-group">
+          <label class="form-label">Equipo</label>
+          <select id="admin-team-select">
+            <option value="">— Seleccionar equipo —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fase alcanzada</label>
+          <select id="admin-phase-select">
+            <option value="Grupos">Fase de grupos</option>
+            <option value="Octavos">Octavos de final</option>
+            <option value="Cuartos">Cuartos de final</option>
+            <option value="Semis">Semifinales</option>
+            <option value="Final">Final</option>
+            <option value="Campeon">Campeón</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Puesto en el grupo (si aplica)</label>
+          <select id="admin-group-pos">
+            <option value="">— Sin especificar —</option>
+            <option value="1">1º de grupo (+7 pts)</option>
+            <option value="2">2º de grupo (+4 pts)</option>
+            <option value="3">3º de grupo (clasifica) (+1 pt)</option>
+          </select>
+        </div>
+        <button class="btn" onclick="saveTeamProgress()">Actualizar equipo</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="padding:20px;margin-bottom:16px">
+        <div class="card-title" style="margin-bottom:16px">Evento de jugador</div>
+        <div class="form-group">
+          <label class="form-label">Jugador</label>
+          <select id="admin-player-select">
+            <option value="">— Seleccionar jugador —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Evento</label>
+          <select id="admin-event-type">
+            <option value="gol">Gol normal (+3)</option>
+            <option value="asistencia">Asistencia (+2)</option>
+            <option value="penalti">Gol de penalti (+1)</option>
+            <option value="amarilla">Tarjeta amarilla (-1)</option>
+            <option value="roja">Tarjeta roja (-3)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Partido / nota (opcional)</label>
+          <input type="text" id="admin-event-note" placeholder="ej. España vs Brasil">
+        </div>
+        <button class="btn" onclick="savePlayerEvent()">Registrar evento</button>
+      </div>
+
+      <div class="card" style="padding:20px">
+        <div class="card-title" style="margin-bottom:16px">Registro de cambios</div>
+        <div id="admin-log" style="max-height:280px;overflow-y:auto">
+          <div class="empty-state"><div class="icon">📋</div>Sin cambios registrados aún</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SCORING = {
+  partidoGanado: 3, partidoEmpatado: 1,
+  primeroGrupo: 7, segundoGrupo: 4, terceroGrupo: 1,
+  octavos: 4, cuartos: 6, semis: 9, final: 11, campeon: 14,
+  golEquipo: 0.5,
+  golNormal: 3, asistencia: 2, golPenalti: 1, amarilla: -1, roja: -3,
+  resultadoExacto: 5, ganadorEmpate: 2
+};
+
+const TIER_MAP = {
+  'Favoritos': 'fav', 'Aspirantes': 'asp', 'Sorpresas': 'sor',
+  'Africanos': 'afr', 'Resto 1': 'res', 'Resto 2': 'res', 'Cenicientas': 'cen'
+};
+
+const CATEGORIES = ['Favoritos','Aspirantes','Sorpresas','Africanos','Resto 1','Resto 2','Cenicientas'];
+const PLAYER_CATS = ['Leyenda','Jugones','Asiáticos'];
+
+const SPECIAL_MATCHES = [
+  { id:'PRED-01', home:'Iran', away:'Nueva Zelanda' },
+  { id:'PRED-02', home:'Haiti', away:'Escocia' },
+  { id:'PRED-03', home:'Costa de Marfil', away:'Ecuador' },
+  { id:'PRED-04', home:'Corea del Sur', away:'Chequia' }
+];
+
+const PLAYER_CATS_RAW = {
+  'Leyenda': ['Messi','Cristiano Ronaldo'],
+  'Jugones': ['Alexis Mac Allister','Enzo Fernández','Federico Valverde','Julián Álvarez','Declan Rice','Ousmane Dembélé','Khvicha Kvaratskhelia','Victor Osimhen','Martin Ødegaard','Bruno Fernandes'],
+  'Asiáticos': ['Son Heung-min','Mehdi Taremi','Ayase Ueda','Eldor Shomurodov','Akram Afif','Tim Payne']
+};
+
+const RAW_PARTICIPANTS = [
+  {id:1,alias:'Dudu',name:'Eduardo Arquez Rodriguez',paid:true,fav:'Portugal,Francia',asp:'Belgica,Noruega',sor:'Turquia,Ecuador',afr:'Senegal,Costa de Marfil',res1:'Paraguay,Chequia',res2:'Arabia Saudi,Congo',cen:'Haiti,Iran',jugones:'Bruno Fernandes',asiaticos:'Mehdi Taremi',leyenda:'Cristiano Ronaldo',pred:[null,null,null,null],predTxt:['3-1','1-2','2-2','1-2']},
+  {id:2,alias:'Angelitros',name:'Ángel Arias López',paid:false,fav:'Espana,Francia',asp:'Noruega,Marruecos',sor:'Ecuador,Suecia',afr:'Senegal,Egipto',res1:'Escocia,Australia',res2:'Irak,Arabia Saudi',cen:'Cabo Verde,Iran',jugones:'Julian Alvarez',asiaticos:'Mehdi Taremi',leyenda:'Cristiano Ronaldo',pred:[null,null,null,null],predTxt:['1-1','0-2','1-3','1-3']},
+  {id:3,alias:'Antonito',name:'Antonio Gómez',paid:false,fav:'Espana,Francia',asp:'Uruguay,Marruecos',sor:'Turquia,Suecia',afr:'Senegal,Egipto',res1:'Corea del Sur,Australia',res2:'Arabia Saudi,Catar',cen:'Curacao,Cabo Verde',jugones:'Ousmane Dembele',asiaticos:'Son Heung-min',leyenda:'Cristiano Ronaldo',pred:[null,null,null,null],predTxt:['2-1','0-2','1-3','3-2']},
+  {id:4,alias:'Felipitoooo',name:'Felipe Gonzalez',paid:true,fav:'Espana,Francia',asp:'Noruega,Japon',sor:'Turquia,Canada',afr:'Senegal,Egipto',res1:'Escocia,Sudafrica',res2:'Arabia Saudi,Catar',cen:'Haiti,Curacao',jugones:'Ousmane Dembele',asiaticos:'Akram Afif',leyenda:'Cristiano Ronaldo',pred:[null,null,null,null],predTxt:['2-1','0-2','3-1','1-1']},
+  {id:5,alias:'Roberto Larcos',name:'Ángel Escalante',paid:false,fav:'Espana,Brasil',asp:'Noruega,Marruecos',sor:'Turquia,Austria',afr:'Senegal,Costa de Marfil',res1:'Paraguay,Escocia',res2:'Irak,Panama',cen:'Uzbekistan,Iran',jugones:'Julian Alvarez',asiaticos:'Son Heung-min',leyenda:'Cristiano Ronaldo',pred:[null,null,null,null],predTxt:['3-1','0-2','1-1','0-0']},
+  {id:6,alias:'Adri93',name:'Adrián González Cañón',paid:true,fav:'Espana,Inglaterra',asp:'Colombia,Belgica',sor:'Suiza,Turquia',afr:'Senegal,Egipto',res1:'Paraguay,Corea del Sur',res2:'Catar,Congo',cen:'Uzbekistan,Iran',jugones:'Julian Alvarez',asiaticos:'Mehdi Taremi',leyenda:'Messi',pred:[null,null,null,null],predTxt:['2-0','0-2','2-2','2-1']},
+  {id:7,alias:'Bizcochito santos',name:'Luis Santos',paid:false,fav:'Espana,Portugal',asp:'Japon,Marruecos',sor:'EEUU,Ecuador',afr:'Senegal,Egipto',res1:'Escocia,Australia',res2:'Nueva Zelanda,Arabia Saudi',cen:'Curacao,Uzbekistan',jugones:'Declan Rice',asiaticos:'Son Heung-min',leyenda:'Cristiano Ronaldo',pred:[null,null,null,null],predTxt:['0-1','0-0','1-3','2-0']},
+  {id:8,alias:'Nach',name:'Nacho',paid:true,fav:'Espana,Portugal',asp:'Croacia,Marruecos',sor:'Turquia,Ecuador',afr:'Senegal,Egipto',res1:'Escocia,Corea del Sur',res2:'Nueva Zelanda,Arabia Saudi',cen:'Uzbekistan,Iran',jugones:'Bruno Fernandes',asiaticos:'Son Heung-min',leyenda:'Cristiano Ronaldo',pred:[null,null,null,null],predTxt:['1-2','0-2','1-2','1-0']},
+  {id:9,alias:'MarioR',name:'Mario Rivas',paid:true,fav:'Espana,Francia',asp:'Colombia,Belgica',sor:'EEUU,Suiza',afr:'Senegal,Egipto',res1:'Escocia,Corea del Sur',res2:'Arabia Saudi,Catar',cen:'Uzbekistan,Iran',jugones:'Ousmane Dembele',asiaticos:'Son Heung-min',leyenda:'Messi',pred:[null,null,null,null],predTxt:['1-0','0-2','1-1','1-1']},
+  {id:10,alias:'Octavio',name:'Octavio Mareque Segura',paid:true,fav:'Portugal,Francia',asp:'Noruega,Marruecos',sor:'Turquia,Ecuador',afr:'Senegal,Argelia',res1:'Paraguay,Chequia',res2:'Nueva Zelanda,Arabia Saudi',cen:'Jordania,Uzbekistan',jugones:'Ousmane Dembele',asiaticos:'Son Heung-min',leyenda:'Cristiano Ronaldo',pred:[null,null,null,null],predTxt:['1-1','0-3','0-2','2-2']},
+  {id:11,alias:'Samubv',name:'Samuel Bodega Valle',paid:true,fav:'Espana,Portugal',asp:'Noruega,Mexico',sor:'Turquia,Ecuador',afr:'Senegal,Argelia',res1:'Escocia,Corea del Sur',res2:'Nueva Zelanda,Arabia Saudi',cen:'Cabo Verde,Iran',jugones:'Declan Rice',asiaticos:'Son Heung-min',leyenda:'Cristiano Ronaldo',pred:[null,null,null,null],predTxt:['1-1','0-2','1-2','1-0']},
+  {id:12,alias:'Franute',name:'Fran García',paid:true,fav:'Espana,Portugal',asp:'Noruega,Marruecos',sor:'EEUU,Ecuador',afr:'Senegal,Egipto',res1:'Paraguay,Australia',res2:'Nueva Zelanda,Arabia Saudi',cen:'Cabo Verde,Uzbekistan',jugones:'Julian Alvarez',asiaticos:'Son Heung-min',leyenda:'Messi',pred:[null,null,null,null],predTxt:['1-3','0-2','1-3','3-1']},
+  {id:13,alias:'Fidel',name:'Fidel Arguiz',paid:false,fav:'Espana,Francia',asp:'Noruega,Marruecos',sor:'Suiza,Turquia',afr:'Senegal,Egipto',res1:'Chequia,Corea del Sur',res2:'Arabia Saudi,Congo',cen:'Jordania,Iran',jugones:'Julian Alvarez',asiaticos:'Son Heung-min',leyenda:'Messi',pred:[null,null,null,null],predTxt:['3-1','0-2','1-1','2-1']},
+  {id:14,alias:'Martin98',name:'Álvaro Martín Alcántara',paid:true,fav:'Espana,Portugal',asp:'Uruguay,Marruecos',sor:'Suiza,Turquia',afr:'Senegal,Costa de Marfil',res1:'Paraguay,Escocia',res2:'Irak,Panama',cen:'Haiti,Cabo Verde',jugones:'Ousmane Dembele',asiaticos:'Son Heung-min',leyenda:'Messi',pred:[null,null,null,null],predTxt:['2-0','0-2','2-1','1-2']},
+  {id:15,alias:'Daniel Villarreal',name:'Daniel Villarreal Diez',paid:true,fav:'Espana,Portugal',asp:'Uruguay,Marruecos',sor:'Turquia,Ecuador',afr:'Egipto,Argelia',res1:'Paraguay,Corea del Sur',res2:'Nueva Zelanda,Catar',cen:'Jordania,Cabo Verde',jugones:'Bruno Fernandes',asiaticos:'Son Heung-min',leyenda:'Cristiano Ronaldo',pred:[null,null,null,null],predTxt:['1-1','0-0','0-1','0-0']},
+  {id:16,alias:'Garrota',name:'Marcos Enríquez',paid:true,fav:'Espana,Francia',asp:'Colombia,Marruecos',sor:'Turquia,Ecuador',afr:'Senegal,Egipto',res1:'Paraguay,Escocia',res2:'Irak,Nueva Zelanda',cen:'Uzbekistan,Iran',jugones:'Ousmane Dembele',asiaticos:'Son Heung-min',leyenda:'Cristiano Ronaldo',pred:[null,null,null,null],predTxt:['1-2','2-2','1-3','1-0']},
+  {id:17,alias:'Peluka19',name:'Ivan Gil',paid:true,fav:'Espana,Brasil',asp:'Belgica,Noruega',sor:'Turquia,Ecuador',afr:'Senegal,Costa de Marfil',res1:'Chequia,Corea del Sur',res2:'Catar,Congo',cen:'Cabo Verde,Iran',jugones:'Federico Valverde',asiaticos:'Mehdi Taremi',leyenda:'Cristiano Ronaldo',pred:[null,null,null,null],predTxt:['3-0','1-5','0-1','1-1']},
+  {id:18,alias:'Alex :)',name:'Alejandro Martínez Quero',paid:true,fav:'Espana,Portugal',asp:'Belgica,Noruega',sor:'Turquia,Ecuador',afr:'Senegal,Costa de Marfil',res1:'Escocia,Corea del Sur',res2:'Nueva Zelanda,Congo',cen:'Uzbekistan,Iran',jugones:'Bruno Fernandes',asiaticos:'Son Heung-min',leyenda:'Cristiano Ronaldo',pred:[null,null,null,null],predTxt:['1-1','0-3','1-2','1-1']},
+  {id:19,alias:'Cocu',name:'Luis Baltés',paid:true,fav:'Francia,Paises Bajos',asp:'Belgica,Marruecos',sor:'EEUU,Ecuador',afr:'Egipto,Argelia',res1:'Paraguay,Chequia',res2:'Panama,Catar',cen:'Uzbekistan,Iran',jugones:'Bruno Fernandes',asiaticos:'Ayase Ueda',leyenda:'Cristiano Ronaldo',pred:[null,null,null,null],predTxt:['1-1','1-3','0-2','2-1']},
+  {id:20,alias:'El calito',name:'Carlos Elena González',paid:false,fav:'Espana,Francia',asp:'Croacia,Marruecos',sor:'EEUU,Turquia',afr:'Senegal,Argelia',res1:'Paraguay,Escocia',res2:'Irak,Congo',cen:'Uzbekistan,Iran',jugones:'Bruno Fernandes',asiaticos:'Mehdi Taremi',leyenda:'Cristiano Ronaldo',pred:[null,null,null,null],predTxt:['1-0','0-2','1-0','1-1']},
+  {id:21,alias:'Juanmaldini',name:'Juanma Espinar',paid:false,fav:'Espana,Portugal',asp:'Japon,Uruguay',sor:'Turquia,Suecia',afr:'Senegal,Egipto',res1:'Escocia,Australia',res2:'Irak,Nueva Zelanda',cen:'Jordania,Curacao',jugones:'Bruno Fernandes',asiaticos:'Son Heung-min',leyenda:'Cristiano Ronaldo',pred:[null,null,null,null],predTxt:['0-2','0-3','2-2','2-1']},
+  {id:22,alias:'psansito',name:'Pablo Sánchez',paid:true,fav:'Espana,Francia',asp:'Colombia,Marruecos',sor:'Suiza,Ecuador',afr:'Senegal,Egipto',res1:'Paraguay,Corea del Sur',res2:'Nueva Zelanda,Congo',cen:'Jordania,Iran',jugones:'Bruno Fernandes',asiaticos:'Son Heung-min',leyenda:'Cristiano Ronaldo',pred:[null,null,null,null],predTxt:['2-0','1-4','2-2','2-1']},
+  {id:23,alias:'Empresario de éxito',name:'César López Miguélez',paid:true,fav:'Espana,Portugal',asp:'Uruguay,Mexico',sor:'Turquia,Ecuador',afr:'Senegal,Argelia',res1:'Paraguay,Escocia',res2:'Arabia Saudi,Catar',cen:'Uzbekistan,Iran',jugones:'Federico Valverde',asiaticos:'Ayase Ueda',leyenda:'Cristiano Ronaldo',pred:[null,null,null,null],predTxt:['1-0','0-4','0-2','0-1']},
+  {id:24,alias:'Becquerbauer',name:'Guillermo Bécquer',paid:true,fav:'Espana,Francia',asp:'Belgica,Marruecos',sor:'Suiza,Turquia',afr:'Senegal,Egipto',res1:'Paraguay,Corea del Sur',res2:'Catar,Congo',cen:'Jordania,Iran',jugones:'Julian Alvarez',asiaticos:'Son Heung-min',leyenda:'Messi',pred:[null,null,null,null],predTxt:['1-0','1-2','1-1','1-1']},
+  {id:25,alias:'Chino',name:'Rodrigo Baranda Gómez',paid:true,fav:'Espana,Francia',asp:'Noruega,Marruecos',sor:'Suiza,Turquia',afr:'Senegal,Ghana',res1:'Paraguay,Chequia',res2:'Arabia Saudi,Congo',cen:'Uzbekistan,Iran',jugones:'Bruno Fernandes',asiaticos:'Son Heung-min',leyenda:'Cristiano Ronaldo',pred:[null,null,null,null],predTxt:['1-0','0-2','2-2','1-0']},
+  {id:26,alias:'Gsus94',name:'Jesús de Andres',paid:false,fav:'Espana,Portugal',asp:'Noruega,Marruecos',sor:'EEUU,Canada',afr:'Costa de Marfil,Egipto',res1:'Paraguay,Corea del Sur',res2:'Irak,Catar',cen:'Jordania,Iran',jugones:'Martin Odegaard',asiaticos:'Son Heung-min',leyenda:'Cristiano Ronaldo',pred:[null,null,null,null],predTxt:['2-1','0-2','2-0','2-1']},
+  {id:27,alias:'Andresrn',name:'Andrés Ruiz Navarrete',paid:true,fav:'Espana,Francia',asp:'Colombia,Belgica',sor:'Turquia,Ecuador',afr:'Costa de Marfil,Egipto',res1:'Paraguay,Escocia',res2:'Arabia Saudi,Congo',cen:'Haiti,Cabo Verde',jugones:'Julian Alvarez',asiaticos:'Mehdi Taremi',leyenda:'Messi',pred:[null,null,null,null],predTxt:['1-2','0-2','2-2','3-1']},
+  {id:28,alias:'Poza',name:'Alejandro Poza Martín',paid:true,fav:'Brasil,Francia',asp:'Uruguay,Croacia',sor:'EEUU,Suiza',afr:'Senegal,Costa de Marfil',res1:'Escocia,Corea del Sur',res2:'Panama,Arabia Saudi',cen:'Uzbekistan,Iran',jugones:'Ousmane Dembele',asiaticos:'Son Heung-min',leyenda:'Messi',pred:[null,null,null,null],predTxt:['1-0','0-1','1-1','1-0']},
+  {id:29,alias:'Roos',name:'Juan Roos',paid:true,fav:'Espana,Francia',asp:'Belgica,Noruega',sor:'Suiza,Ecuador',afr:'Senegal,Costa de Marfil',res1:'Escocia,Corea del Sur',res2:'Arabia Saudi,Congo',cen:'Uzbekistan,Iran',jugones:'Julian Alvarez',asiaticos:'Mehdi Taremi',leyenda:'Messi',pred:[null,null,null,null],predTxt:['1-0','0-2','1-2','1-1']},
+  {id:30,alias:'Messi lover',name:'Morena Figueroa',paid:false,fav:'Argentina,Francia',asp:'Colombia,Belgica',sor:'Suiza,Ecuador',afr:'Senegal,Costa de Marfil',res1:'Paraguay,Australia',res2:'Irak,Arabia Saudi',cen:'Jordania,Iran',jugones:'Ousmane Dembele',asiaticos:'Son Heung-min',leyenda:'Messi',pred:[null,null,null,null],predTxt:['2-0','1-2','0-1','2-1']},
+  {id:31,alias:'FrancisBacon18',name:'Francisco J. Perela',paid:true,fav:'Espana,Portugal',asp:'Japon,Croacia',sor:'Suiza,Turquia',afr:'Senegal,Costa de Marfil',res1:'Escocia,Sudafrica',res2:'Irak,Nueva Zelanda',cen:'Haiti,Uzbekistan',jugones:'Julian Alvarez',asiaticos:'Eldor Shomurodov',leyenda:'Cristiano Ronaldo',pred:[null,null,null,null],predTxt:['1-3','2-2','2-1','1-2']},
+  {id:32,alias:'Al-Var',name:'Alba Gonzalez',paid:true,fav:'Espana,Portugal',asp:'Japon,Marruecos',sor:'EEUU,Turquia',afr:'Egipto,Argelia',res1:'Corea del Sur,Australia',res2:'Panama,Congo',cen:'Uzbekistan,Iran',jugones:'Ousmane Dembele',asiaticos:'Tim Payne',leyenda:'Messi',pred:[null,null,null,null],predTxt:['1-1','0-2','0-1','2-2']},
+  {id:33,alias:'QuiQueen',name:'Enrique Arias López',paid:false,fav:'Brasil,Portugal',asp:'Belgica,Marruecos',sor:'EEUU,Turquia',afr:'Senegal,Costa de Marfil',res1:'Escocia,Chequia',res2:'Arabia Saudi,Congo',cen:'Cabo Verde,Iran',jugones:'Ousmane Dembele',asiaticos:'Son Heung-min',leyenda:'Cristiano Ronaldo',pred:[null,null,null,null],predTxt:['2-1','0-2','1-3','1-1']},
+  {id:34,alias:'Pau',name:'Paula Estévez Bartolomé',paid:false,fav:'Espana,Portugal',asp:'Belgica,Marruecos',sor:'Suiza,Suecia',afr:'Senegal,Egipto',res1:'Paraguay,Corea del Sur',res2:'Arabia Saudi,Congo',cen:'Uzbekistan,Iran',jugones:'Julian Alvarez',asiaticos:'Son Heung-min',leyenda:'Cristiano Ronaldo',pred:[null,null,null,null],predTxt:['2-0','0-1','0-2','2-1']},
+  {id:35,alias:'Mataleanto',name:'Antonio Mateos',paid:true,fav:'Espana,Portugal',asp:'Noruega,Marruecos',sor:'Suiza,Ecuador',afr:'Senegal,Ghana',res1:'Paraguay,Escocia',res2:'Nueva Zelanda,Congo',cen:'Cabo Verde,Iran',jugones:'Julian Alvarez',asiaticos:'Son Heung-min',leyenda:'Cristiano Ronaldo',pred:[null,null,null,null],predTxt:['1-1','0-2','1-2','1-0']},
+  {id:36,alias:'Javito',name:'Javier Gonzalez',paid:true,fav:'Portugal,Francia',asp:'Colombia,Marruecos',sor:'Turquia,Ecuador',afr:'Senegal,Argelia',res1:'Escocia,Corea del Sur',res2:'Arabia Saudi,Catar',cen:'Uzbekistan,Iran',jugones:'Ousmane Dembele',asiaticos:'Son Heung-min',leyenda:'Cristiano Ronaldo',pred:[null,null,null,null],predTxt:['3-1','0-3','2-3','3-1']},
+  {id:37,alias:'No hay que saber...',name:'Asier Seijas',paid:true,fav:'Espana,Francia',asp:'Colombia,Marruecos',sor:'EEUU,Suecia',afr:'Ghana,Argelia',res1:'Paraguay,Sudafrica',res2:'Nueva Zelanda,Arabia Saudi',cen:'Haiti,Curacao',jugones:'Declan Rice',asiaticos:'Son Heung-min',leyenda:'Messi',pred:[null,null,null,null],predTxt:['0-2','0-0','0-3','1-1']},
+  {id:38,alias:'🦁14',name:'Javier de Eusebio',paid:true,fav:'Espana,Portugal',asp:'Noruega,Marruecos',sor:'Suiza,Ecuador',afr:'Senegal,Ghana',res1:'Paraguay,Corea del Sur',res2:'Catar,Congo',cen:'Uzbekistan,Iran',jugones:'Bruno Fernandes',asiaticos:'Son Heung-min',leyenda:'Cristiano Ronaldo',pred:[null,null,null,null],predTxt:['3-0','0-2','2-3','1-0']}
+];
+
+let appState = {
+  participants: JSON.parse(JSON.stringify(RAW_PARTICIPANTS)),
+  matches: JSON.parse(JSON.stringify(SPECIAL_MATCHES.map(m=>({...m,golesHome:null,golesAway:null,estado:'Pendiente'})))),
+  players: {},
+  teams: {},
+  adminLog: [],
+  lastUpdate: new Date().toISOString()
+};
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem('porra2026_v2');
+    if (saved) { const s = JSON.parse(saved); if(s.participants) appState = s; }
+  } catch(e) {}
+}
+function saveState() {
+  try { localStorage.setItem('porra2026_v2', JSON.stringify(appState)); } catch(e) {}
+}
+
+function initPlayers() {
+  if (Object.keys(appState.players).length > 0) return;
+  Object.entries(PLAYER_CATS_RAW).forEach(([cat, players]) => {
+    players.forEach(p => {
+      if (!appState.players[p]) {
+        appState.players[p] = { cat, goles:0, asistencias:0, penaltis:0, amarillas:0, rojas:0, total:0 };
+      }
+    });
+  });
+}
+
+function calcPlayerTotal(p) {
+  const pl = appState.players[p];
+  return (pl.goles * SCORING.golNormal) + (pl.asistencias * SCORING.asistencia) +
+    (pl.penaltis * SCORING.golPenalti) + (pl.amarillas * SCORING.amarilla) +
+    (pl.rojas * SCORING.roja);
+}
+
+function calcMatchPredPoints(participant, matchIdx) {
+  const match = appState.matches[matchIdx];
+  if (match.golesHome === null) return 0;
+  const predTxt = participant.predTxt[matchIdx];
+  if (!predTxt) return 0;
+  const parts = predTxt.split('-');
+  const pHome = parseInt(parts[0]); const pAway = parseInt(parts[1]);
+  if (pHome === match.golesHome && pAway === match.golesAway) return SCORING.resultadoExacto;
+  const actResult = match.golesHome > match.golesAway ? 'H' : match.golesHome < match.golesAway ? 'A' : 'D';
+  const predResult = pHome > pAway ? 'H' : pHome < pAway ? 'A' : 'D';
+  if (actResult === predResult) return SCORING.ganadorEmpate;
+  return 0;
+}
+
+function calcParticipantPoints(p) {
+  let teamPts = 0, playerPts = 0, matchPts = 0;
+  const cats = ['fav','asp','sor','afr','res1','res2','cen'];
+  const catNames = ['Favoritos','Aspirantes','Sorpresas','Africanos','Resto 1','Resto 2','Cenicientas'];
+  cats.forEach((c, i) => {
+    const teams = p[c].split(',').map(t=>t.trim());
+    teams.forEach(t => {
+      const ts = appState.teams[t]; if (!ts) return;
+      teamPts += (ts.wins||0) * SCORING.partidoGanado;
+      teamPts += (ts.draws||0) * SCORING.partidoEmpatado;
+      teamPts += (ts.goals||0) * SCORING.golEquipo;
+      if (ts.groupPos==1) teamPts += SCORING.primeroGrupo;
+      else if (ts.groupPos==2) teamPts += SCORING.segundoGrupo;
+      else if (ts.groupPos==3) teamPts += SCORING.terceroGrupo;
+      if (ts.phase=='Octavos') teamPts += SCORING.octavos;
+      else if (ts.phase=='Cuartos') teamPts += SCORING.octavos + SCORING.cuartos;
+      else if (ts.phase=='Semis') teamPts += SCORING.octavos + SCORING.cuartos + SCORING.semis;
+      else if (ts.phase=='Final') teamPts += SCORING.octavos + SCORING.cuartos + SCORING.semis + SCORING.final;
+      else if (ts.phase=='Campeon') teamPts += SCORING.octavos + SCORING.cuartos + SCORING.semis + SCORING.final + SCORING.campeon;
+    });
+  });
+  ['jugones','asiaticos','leyenda'].forEach(cat => {
+    const player = p[cat]; if (!player || !appState.players[player]) return;
+    playerPts += appState.players[player].total || 0;
+  });
+  for (let i=0; i<4; i++) matchPts += calcMatchPredPoints(p, i);
+  return { teamPts: Math.round(teamPts*10)/10, playerPts, matchPts, total: Math.round((teamPts + playerPts + matchPts)*10)/10 };
+}
+
+function showTab(name) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('sec-'+name).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t => { if(t.textContent.toLowerCase().includes(name.slice(0,5))) t.classList.add('active'); });
+  const tabMap = {ranking:0,partidos:1,equipos:2,jugadores:3,picks:4,reglas:5,admin:6};
+  const tabs = document.querySelectorAll('.nav-tab');
+  if (tabs[tabMap[name]]) { tabs[tabMap[name]].classList.add('active'); }
+  renderSection(name);
+}
+
+function renderSection(name) {
+  if (name==='ranking') renderRanking();
+  else if (name==='partidos') renderMatches();
+  else if (name==='equipos') renderTeams();
+  else if (name==='jugadores') renderPlayers();
+  else if (name==='picks') renderPicks();
+  else if (name==='reglas') renderRules();
+  else if (name==='admin') renderAdmin();
+}
+
+function getRanking() {
+  return appState.participants.map(p => {
+    const pts = calcParticipantPoints(p);
+    return { ...p, ...pts };
+  }).sort((a,b)=>b.total-a.total).map((p,i)=>({...p, rank:i+1}));
+}
+
+function renderRanking() {
+  const ranking = getRanking();
+  const total = appState.participants.length;
+  const bote = total * 10;
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Participantes</div><div class="stat-val">${total}</div><div class="stat-sub">Todos confirmados</div></div>
+    <div class="stat-card"><div class="stat-label">Bote total</div><div class="stat-val">${bote}€</div><div class="stat-sub">10€ por persona</div></div>
+    <div class="stat-card"><div class="stat-label">1er premio</div><div class="stat-val">${Math.round(bote*0.7)}€</div><div class="stat-sub">70% del bote</div></div>
+    <div class="stat-card"><div class="stat-label">Partidos jugados</div><div class="stat-val">${appState.matches.filter(m=>m.golesHome!==null).length}/4</div><div class="stat-sub">Partidos especiales</div></div>
+  `;
+  const penultimo = ranking[ranking.length - 2];
+  const podiumData = [
+    { p: ranking[0], medal: '🥇', cls: 'first', prize: Math.round(bote*0.7)+'€', label: '1er puesto' },
+    { p: ranking[1], medal: '🥈', cls: 'second', prize: Math.round(bote*0.2)+'€', label: '2º puesto' },
+    { p: penultimo,  medal: '🪙', cls: 'third',  prize: Math.round(bote*0.1)+'€', label: 'Penúltimo' },
+  ];
+  const order = [1,0,2];
+  document.getElementById('podium').innerHTML = order.map(i => {
+    const d = podiumData[i];
+    return `<div class="podium-place ${d.cls}">
+      <div class="medal">${d.medal}</div>
+      <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px">${d.label}</div>
+      <div class="podium-alias">${d.p?.alias||'—'}</div>
+      <div class="podium-pts">${d.p?.total||0}</div>
+      <div class="podium-pts-label">pts · <span style="color:var(--gold)">${d.prize}</span></div>
+    </div>`;
+  }).join('');
+  document.getElementById('ranking-subtitle').textContent = `${total} participantes · Bote: ${total*10}€ · Premio penúltimo: ${Math.round(total*10*0.1)}€`;
+  const prizes = { 1: Math.round(bote*0.7)+'€', 2: Math.round(bote*0.2)+'€', [appState.participants.length-1]: Math.round(bote*0.1)+'€ (penúlt.)' };
+  document.getElementById('ranking-body').innerHTML = ranking.map(p => `
+    <tr>
+      <td class="rank-num ${p.rank<=2?'rank-'+p.rank:''}">${p.rank}</td>
+      <td class="alias-cell">${p.alias}${prizes[p.rank]?` <span class="badge badge-camp">${prizes[p.rank]}</span>`:''}<br><span style="font-size:11px;color:var(--text-muted)">${p.name}</span></td>
+      <td class="num">${p.teamPts}</td>
+      <td class="num">${p.playerPts}</td>
+      <td class="num">${p.matchPts}</td>
+      <td class="num" style="font-size:15px">${p.total}</td>
+      <td class="num"><span class="delta eq">—</span></td>
+    </tr>
+  `).join('');
+}
+
+function renderMatches() {
+  document.getElementById('special-matches').innerHTML = appState.matches.map((m, i) => {
+    const played = m.golesHome !== null;
+    return `<div class="match-wrapper">
+      <span class="special-tag">Partido especial ${i+1}</span>
+      <div class="match-card match-special">
+        <div class="match-team home">${m.home}</div>
+        <div style="text-align:center">
+          <div class="match-score ${played?'':'pending'}">${played ? m.golesHome+' — '+m.golesAway : 'vs'}</div>
+          <div class="match-meta">${played?'Finalizado':'Pendiente'}</div>
+        </div>
+        <div class="match-team away">${m.away}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderTeams() {
+  const ranking = getRanking();
+  document.getElementById('team-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Equipo más elegido</div><div class="stat-val" style="font-size:16px">Esp / Fra</div><div class="stat-sub">Favoritos del grupo</div></div>
+    <div class="stat-card"><div class="stat-label">Jugador + elegido</div><div class="stat-val" style="font-size:15px">Son Heung-min</div><div class="stat-sub">28 picks</div></div>
+  `;
+  const catKeys = ['fav','asp','sor','afr','res1','res2','cen'];
+  document.getElementById('teams-body').innerHTML = ranking.map(p => {
+    const teams = (key) => {
+      const ts = p[key].split(',').map(t=>t.trim());
+      return ts.map(t=>`<span style="font-size:12px">${t}</span>`).join('<br>');
+    };
+    return `<tr>
+      <td><strong style="font-size:13px">${p.alias}</strong></td>
+      ${catKeys.map(k=>`<td style="font-size:12px;line-height:1.8">${teams(k)}</td>`).join('')}
+      <td class="num">${p.teamPts}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderPlayers() {
+  const cats = PLAYER_CATS_RAW;
+  document.getElementById('player-panels').innerHTML = Object.entries(cats).map(([cat, players]) => `
+    <p style="font-size:13px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:12px">${cat}</p>
+    <div class="player-grid" style="margin-bottom:24px">
+      ${players.map(p => {
+        const pl = appState.players[p] || {goles:0,asistencias:0,penaltis:0,amarillas:0,rojas:0,total:0};
+        const total = calcPlayerTotal(p);
+        const picked = appState.participants.filter(par =>
+          par.jugones===p||par.asiaticos===p||par.leyenda===p).length;
+        return `<div class="player-card ${cat==='Leyenda'?'leyenda':''}">
+          <div class="player-name">${p}</div>
+          <div class="player-cat">${cat} · Elegido por ${picked}</div>
+          <div class="player-stat-row"><span class="player-stat-label">Goles</span><span>${pl.goles}</span></div>
+          <div class="player-stat-row"><span class="player-stat-label">Asistencias</span><span>${pl.asistencias}</span></div>
+          <div class="player-stat-row"><span class="player-stat-label">Penaltis</span><span>${pl.penaltis}</span></div>
+          <div class="player-stat-row"><span class="player-stat-label">Amarillas</span><span style="color:${pl.amarillas>0?'#EFC050':''}">${pl.amarillas}</span></div>
+          <div class="player-stat-row"><span class="player-stat-label">Rojas</span><span style="color:${pl.rojas>0?'var(--red)':''}">${pl.rojas}</span></div>
+          <div class="player-total">${total > 0 ? '+' : ''}${total}</div>
+          <div class="player-total-label">puntos totales</div>
+        </div>`;
+      }).join('')}
+    </div>
+  `).join('');
+}
+
+let currentPickFilter = 'all';
+function filterPicks(filter, btn) {
+  currentPickFilter = filter;
+  document.querySelectorAll('.picks-filter button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPicksContent();
+}
+function renderPicks() { renderPicksContent(); }
+
+function renderPicksContent() {
+  const f = currentPickFilter;
+  const ranking = getRanking();
+
+  if (f === 'jugadores') {
+    document.getElementById('picks-content').innerHTML = `<div class="card">
+      <table>
+        <thead><tr><th>Participante</th><th>Leyenda</th><th>Jugones</th><th>Asiáticos</th><th class="num">Pts jugadores</th></tr></thead>
+        <tbody>${ranking.map(p=>`<tr>
+          <td class="alias-cell">${p.alias}</td>
+          <td>${p.leyenda}</td><td>${p.jugones}</td><td>${p.asiaticos}</td>
+          <td class="num">${p.playerPts}</td>
+        </tr>`).join('')}</tbody>
+      </table></div>`;
+    return;
+  }
+
+  if (f === 'pronosticos') {
+    document.getElementById('picks-content').innerHTML = `<div class="card">
+      <table>
+        <thead><tr>
+          <th>Participante</th>
+          ${SPECIAL_MATCHES.map(m=>`<th style="font-size:11px">${m.home} vs ${m.away}</th>`).join('')}
+          <th class="num">Pts pronóst.</th>
+        </tr></thead>
+        <tbody>${ranking.map(p=>`<tr>
+          <td class="alias-cell">${p.alias}</td>
+          ${p.predTxt.map((pred,i)=>{
+            const pts = calcMatchPredPoints(p,i);
+            const color = pts===5?'var(--gold)':pts===2?'#4CAF50':'var(--text-muted)';
+            return `<td style="font-size:13px;color:${color}">${pred||'—'} ${pts>0?'(+'+pts+')':''}</td>`;
+          }).join('')}
+          <td class="num">${p.matchPts}</td>
+        </tr>`).join('')}</tbody>
+      </table></div>`;
+    return;
+  }
+
+  const catMap = {
+    all: ['fav','asp','sor','afr','res1','res2','cen'],
+    'Favoritos':['fav'], 'Aspirantes':['asp'], 'Sorpresas':['sor'],
+    'Africanos':['afr'], 'Resto 1':['res1'], 'Resto 2':['res2'], 'Cenicientas':['cen']
+  };
+  const keys = catMap[f] || catMap.all;
+  const keyLabels = {fav:'Favoritos',asp:'Aspirantes',sor:'Sorpresas',afr:'Africanos',res1:'Resto 1',res2:'Resto 2',cen:'Cenicientas'};
+
+  document.getElementById('picks-content').innerHTML = keys.map(key => `
+    <div class="card" style="margin-bottom:16px">
+      <div class="block-header">${keyLabels[key]}</div>
+      <table>
+        <thead><tr><th>Participante</th><th>Pick 1</th><th>Pick 2</th><th class="num">Pts equipos</th></tr></thead>
+        <tbody>${ranking.map(p => {
+          const teams = p[key].split(',').map(t=>t.trim());
+          return `<tr>
+            <td class="alias-cell">${p.alias}</td>
+            <td>${teams[0]||'—'}</td>
+            <td>${teams[1]||'—'}</td>
+            <td class="num">${p.teamPts}</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>
+  `).join('');
+}
+
+function renderRules() {
+  const teamScoring = [
+    {label:'Partido ganado', pts:'+3'},
+    {label:'Partido empatado', pts:'+1'},
+    {label:'1º de grupo', pts:'+7'},
+    {label:'2º de grupo', pts:'+4'},
+    {label:'3º de grupo', pts:'+1'},
+    {label:'Pasar a octavos', pts:'+4'},
+    {label:'Pasar a cuartos', pts:'+6'},
+    {label:'Pasar a semis', pts:'+9'},
+    {label:'Llegar a la final', pts:'+11'},
+    {label:'Campeón', pts:'+14'},
+    {label:'Por cada gol', pts:'+0.5'},
+  ];
+  const playerScoring = [
+    {label:'Gol normal', pts:'+3'},
+    {label:'Asistencia', pts:'+2'},
+    {label:'Gol de penalti', pts:'+1'},
+    {label:'Tarjeta amarilla', pts:'-1', neg:true},
+    {label:'Tarjeta roja', pts:'-3', neg:true},
+  ];
+  const specialScoring = [
+    {label:'Resultado exacto', pts:'+5'},
+    {label:'Ganador / empate', pts:'+2'},
+  ];
+  const row = (item) => `<div class="scoring-item"><span>${item.label}</span><span class="scoring-pts ${item.neg?'neg':''}">${item.pts}</span></div>`;
+  document.getElementById('scoring-teams').innerHTML = teamScoring.map(row).join('');
+  document.getElementById('scoring-players').innerHTML = playerScoring.map(row).join('');
+  document.getElementById('scoring-special').innerHTML = specialScoring.map(row).join('');
+}
+
+function renderAdmin() {
+  const matchSel = document.getElementById('admin-match-id');
+  if (matchSel.options.length <= 1) {
+    appState.matches.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.id; opt.textContent = `${m.home} vs ${m.away}`;
+      matchSel.appendChild(opt);
+    });
+  }
+  const teamSel = document.getElementById('admin-team-select');
+  if (teamSel.options.length <= 1) {
+    const allTeams = [...new Set(appState.participants.flatMap(p =>
+      ['fav','asp','sor','afr','res1','res2','cen'].flatMap(k => p[k].split(',').map(t=>t.trim()))
+    ))].sort();
+    allTeams.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t; opt.textContent = t;
+      teamSel.appendChild(opt);
+    });
+  }
+  const playerSel = document.getElementById('admin-player-select');
+  if (playerSel.options.length <= 1) {
+    Object.entries(PLAYER_CATS_RAW).forEach(([cat, players]) => {
+      players.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p; opt.textContent = `${p} (${cat})`;
+        playerSel.appendChild(opt);
+      });
+    });
+  }
+  renderAdminLog();
+}
+
+function fillMatchTeams() {
+  const id = document.getElementById('admin-match-id').value;
+  const match = appState.matches.find(m=>m.id===id);
+  if (!match) return;
+  document.getElementById('admin-team-a-label').textContent = match.home;
+  document.getElementById('admin-team-b-label').textContent = match.away;
+  if (match.golesHome!==null) {
+    document.getElementById('admin-goals-a').value = match.golesHome;
+    document.getElementById('admin-goals-b').value = match.golesAway;
+  } else {
+    document.getElementById('admin-goals-a').value = '';
+    document.getElementById('admin-goals-b').value = '';
+  }
+  previewMatchPoints();
+}
+
+function previewMatchPoints() {
+  const id = document.getElementById('admin-match-id').value;
+  const ga = document.getElementById('admin-goals-a').value;
+  const gb = document.getElementById('admin-goals-b').value;
+  const preview = document.getElementById('match-preview');
+  if (!id || ga===''||gb==='') { preview.style.display='none'; return; }
+  const match = appState.matches.find(m=>m.id===id);
+  const tmpMatch = {...match, golesHome:parseInt(ga), golesAway:parseInt(gb)};
+  const idx = appState.matches.indexOf(match);
+  const winners = appState.participants.filter(p => {
+    const txt = p.predTxt[idx]; if (!txt) return false;
+    const parts = txt.split('-');
+    return parseInt(parts[0])===parseInt(ga) && parseInt(parts[1])===parseInt(gb);
+  });
+  const close = appState.participants.filter(p => {
+    const txt = p.predTxt[idx]; if (!txt) return false;
+    const parts = txt.split('-');
+    const actRes = parseInt(ga)>parseInt(gb)?'H':parseInt(ga)<parseInt(gb)?'A':'D';
+    const predRes = parseInt(parts[0])>parseInt(parts[1])?'H':parseInt(parts[0])<parseInt(parts[1])?'A':'D';
+    return actRes===predRes && !(parseInt(parts[0])===parseInt(ga)&&parseInt(parts[1])===parseInt(gb));
+  });
+  preview.style.display='block';
+  preview.innerHTML = `Resultado exacto (+5): <strong style="color:var(--gold)">${winners.length} personas</strong> · Ganador/empate (+2): <strong style="color:#4CAF50">${close.length} personas</strong>`;
+}
+
+function saveMatchResult() {
+  const id = document.getElementById('admin-match-id').value;
+  const ga = document.getElementById('admin-goals-a').value;
+  const gb = document.getElementById('admin-goals-b').value;
+  if (!id||ga===''||gb==='') { showToast('Selecciona el partido y los goles'); return; }
+  const match = appState.matches.find(m=>m.id===id);
+  match.golesHome = parseInt(ga); match.golesAway = parseInt(gb); match.estado='Finalizado';
+  logAction(`Resultado: ${match.home} ${ga}-${gb} ${match.away}`);
+  saveState(); showToast('Resultado guardado'); renderRanking();
+}
+
+function saveTeamProgress() {
+  const team = document.getElementById('admin-team-select').value;
+  const phase = document.getElementById('admin-phase-select').value;
+  const groupPos = document.getElementById('admin-group-pos').value;
+  if (!team) { showToast('Selecciona un equipo'); return; }
+  if (!appState.teams[team]) appState.teams[team] = {wins:0,draws:0,goals:0,groupPos:null,phase:'Grupos'};
+  appState.teams[team].phase = phase;
+  if (groupPos) appState.teams[team].groupPos = parseInt(groupPos);
+  logAction(`Equipo ${team}: fase ${phase}${groupPos?' / '+groupPos+'º grupo':''}`);
+  saveState(); showToast(`${team} actualizado`); renderRanking();
+}
+
+function savePlayerEvent() {
+  const player = document.getElementById('admin-player-select').value;
+  const event = document.getElementById('admin-event-type').value;
+  const note = document.getElementById('admin-event-note').value;
+  if (!player) { showToast('Selecciona un jugador'); return; }
+  if (!appState.players[player]) appState.players[player] = {goles:0,asistencias:0,penaltis:0,amarillas:0,rojas:0,total:0};
+  const pl = appState.players[player];
+  const evMap = {gol:'goles',asistencia:'asistencias',penalti:'penaltis',amarilla:'amarillas',roja:'rojas'};
+  pl[evMap[event]] = (pl[evMap[event]]||0) + 1;
+  pl.total = calcPlayerTotal(player);
+  logAction(`${player}: ${event}${note?' ('+note+')':''}`);
+  saveState(); showToast(`Evento registrado para ${player}`);
+}
+
+function logAction(msg) {
+  appState.adminLog.unshift({ts: new Date().toLocaleTimeString('es'), msg});
+  renderAdminLog();
+}
+function renderAdminLog() {
+  const log = appState.adminLog;
+  document.getElementById('admin-log').innerHTML = log.length === 0
+    ? '<div class="empty-state"><div class="icon">📋</div>Sin cambios registrados aún</div>'
+    : log.map(e=>`<div style="padding:8px 0;border-bottom:0.5px solid var(--border);font-size:12px"><span style="color:var(--text-muted)">${e.ts}</span> — ${e.msg}</div>`).join('');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+const NETLIFY_API = 'https://precious-clafoutis-bd0b23.netlify.app/.netlify/functions/api';
+const SYNC_INTERVAL_MS = 3 * 60 * 1000;
+
+async function syncFromAPI() {
+  try {
+    const res = await fetch(NETLIFY_API);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    let changed = false;
+
+    if (data.matches && data.matches.length > 0) {
+      data.matches.forEach(m => {
+        const existing = appState.matches.find(x => x.id === m.id);
+        if (existing && m.golesHome !== null) {
+          existing.golesHome = m.golesHome;
+          existing.golesAway = m.golesAway;
+          existing.estado = m.estado;
+          changed = true;
+        }
+      });
+    }
+
+    if (data.players && Object.keys(data.players).length > 0) {
+      Object.entries(data.players).forEach(([name, stats]) => {
+        const normalized = Object.keys(appState.players).find(p =>
+          p.toLowerCase().replace(/[áàä]/g,'a').replace(/[éèë]/g,'e')
+           .replace(/[íìï]/g,'i').replace(/[óòö]/g,'o').replace(/[úùü]/g,'u')
+           .replace(/ø/g,'o').replace(/ñ/g,'n') ===
+          name.toLowerCase().replace(/[áàä]/g,'a').replace(/[éèë]/g,'e')
+           .replace(/[íìï]/g,'i').replace(/[óòö]/g,'o').replace(/[úùü]/g,'u')
+           .replace(/ø/g,'o').replace(/ñ/g,'n')
+        );
+        if (normalized) {
+          appState.players[normalized].goles = stats.goles || 0;
+          appState.players[normalized].asistencias = stats.asistencias || 0;
+          appState.players[normalized].penaltis = stats.penaltis || 0;
+          appState.players[normalized].amarillas = stats.amarillas || 0;
+          appState.players[normalized].rojas = stats.rojas || 0;
+          appState.players[normalized].total = calcPlayerTotal(normalized);
+          changed = true;
+        }
+      });
+    }
+
+    if (changed) {
+      saveState();
+      const currentSection = document.querySelector('.section.active')?.id?.replace('sec-','');
+      if (currentSection) renderSection(currentSection);
+      logAction('Sincronización automática con API-Football');
+    }
+
+    appState.lastSync = data.lastSync || new Date().toISOString();
+    updateTimestamp();
+
+  } catch(err) {
+    console.warn('Sync error:', err.message);
+  }
+}
+
+function updateTimestamp() {
+  const now = new Date();
+  const syncTime = appState.lastSync ? new Date(appState.lastSync).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}) : null;
+  document.getElementById('last-update-text').textContent = syncTime
+    ? 'Última sync ' + syncTime
+    : 'Actualizado ' + now.toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+}
+
+loadState();
+initPlayers();
+renderRanking();
+renderRules();
+syncFromAPI();
+updateTimestamp();
+setInterval(syncFromAPI, SYNC_INTERVAL_MS);
+setInterval(updateTimestamp, 60000);
+</script>
+</body>
+</html>
