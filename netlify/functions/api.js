@@ -1,10 +1,6 @@
 const API_KEY = process.env.API_FOOTBALL_KEY;
 const BASE_URL = "https://v3.football.api-sports.io";
-
-const HEADERS = {
-  "x-apisports-key": API_KEY
-};
-
+const HEADERS = { "x-apisports-key": API_KEY };
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "Content-Type",
@@ -12,10 +8,10 @@ const CORS = {
 };
 
 const SPECIAL_FIXTURES = [
-  { id: "PRED-01", home: "Iran",          away: "New Zealand" },
-  { id: "PRED-02", home: "Haiti",         away: "Scotland"    },
-  { id: "PRED-03", home: "Ivory Coast",   away: "Ecuador"     },
-  { id: "PRED-04", home: "South Korea",   away: "Czech Republic" }
+  { id: "PRED-01", home: "Iran",        away: "New Zealand" },
+  { id: "PRED-02", home: "Haiti",       away: "Scotland"    },
+  { id: "PRED-03", home: "Ivory Coast", away: "Ecuador"     },
+  { id: "PRED-04", home: "South Korea", away: "Czech Republic" }
 ];
 
 const TRACKED_PLAYERS = [
@@ -49,10 +45,7 @@ function matchesSpecial(fixture) {
 
 function isTrackedPlayer(name) {
   const n = normalize(name);
-  return TRACKED_PLAYERS.some(p => {
-    const pn = normalize(p);
-    return n.includes(pn) || pn.includes(n);
-  });
+  return TRACKED_PLAYERS.some(p => normalize(p).split(" ").some(part => n.includes(part) && part.length > 2));
 }
 
 exports.handler = async (event) => {
@@ -60,21 +53,37 @@ exports.handler = async (event) => {
     return { statusCode: 200, headers: CORS, body: "" };
   }
 
-  try {
-    const fixturesData = await fetchJSON(
-      `${BASE_URL}/fixtures?league=1&season=2026`
-    );
+  const debug = event.queryStringParameters?.debug === "1";
 
+  try {
+    const fixturesData = await fetchJSON(`${BASE_URL}/fixtures?league=1&season=2026`);
     const fixtures = fixturesData.response || [];
+
+    if (debug) {
+      const summary = fixtures.map(f => ({
+        id: f.fixture.id,
+        date: f.fixture.date,
+        status: f.fixture.status.short,
+        home: f.teams.home.name,
+        away: f.teams.away.name,
+        score: `${f.goals.home}-${f.goals.away}`
+      }));
+      return {
+        statusCode: 200,
+        headers: { ...CORS, "Content-Type": "application/json" },
+        body: JSON.stringify({ total: fixtures.length, fixtures: summary })
+      };
+    }
+
     const results = { matches: [], players: {}, lastSync: new Date().toISOString() };
 
     const playedFixtures = fixtures.filter(f =>
-      ["FT", "AET", "PEN"].includes(f.fixture.status.short)
+      ["FT", "AET", "PEN", "1H", "HT", "2H", "ET", "P"].includes(f.fixture.status.short)
     );
 
     for (const fixture of playedFixtures) {
       const special = matchesSpecial(fixture);
-      if (special) {
+      if (special && fixture.goals.home !== null) {
         results.matches.push({
           id: special.id,
           home: special.home,
@@ -89,22 +98,17 @@ exports.handler = async (event) => {
       const isGroup = (fixture.league.round || "").toLowerCase().includes("group");
       if (!isGroup) continue;
 
-      const eventsData = await fetchJSON(
-        `${BASE_URL}/fixtures/events?fixture=${fixture.fixture.id}`
-      );
+      const eventsData = await fetchJSON(`${BASE_URL}/fixtures/events?fixture=${fixture.fixture.id}`);
       const events = eventsData.response || [];
 
       for (const ev of events) {
         const playerName = ev.player?.name;
         if (!playerName || !isTrackedPlayer(playerName)) continue;
-
         if (!results.players[playerName]) {
           results.players[playerName] = { goles: 0, asistencias: 0, penaltis: 0, amarillas: 0, rojas: 0 };
         }
-
         const type = (ev.type || "").toLowerCase();
         const detail = (ev.detail || "").toLowerCase();
-
         if (type === "goal") {
           if (detail.includes("penalty")) results.players[playerName].penaltis++;
           else results.players[playerName].goles++;
@@ -112,7 +116,6 @@ exports.handler = async (event) => {
           if (detail.includes("yellow")) results.players[playerName].amarillas++;
           else if (detail.includes("red")) results.players[playerName].rojas++;
         }
-
         const assistName = ev.assist?.name;
         if (assistName && type === "goal" && isTrackedPlayer(assistName)) {
           if (!results.players[assistName]) {
