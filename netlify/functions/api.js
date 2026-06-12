@@ -1,33 +1,17 @@
-const API_KEY = process.env.API_FOOTBALL_KEY;
-const BASE_URL = "https://v3.football.api-sports.io";
-const HEADERS = { "x-apisports-key": API_KEY };
+const WORLDCUP_JSON = "https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json";
+
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "Content-Type",
   "Access-Control-Allow-Methods": "GET, OPTIONS"
 };
 
-const SPECIAL_FIXTURES = [
+const SPECIAL_MATCHES = [
   { id: "PRED-01", home: "Iran",        away: "New Zealand" },
   { id: "PRED-02", home: "Haiti",       away: "Scotland"    },
   { id: "PRED-03", home: "Ivory Coast", away: "Ecuador"     },
   { id: "PRED-04", home: "South Korea", away: "Czech Republic" }
 ];
-
-const TRACKED_PLAYERS = [
-  "L. Messi", "C. Ronaldo",
-  "A. Mac Allister", "E. Fernandez", "F. Valverde", "J. Alvarez",
-  "D. Rice", "O. Dembele", "K. Kvaratskhelia", "V. Osimhen",
-  "M. Odegaard", "B. Fernandes",
-  "Son Heung-min", "M. Taremi", "A. Ueda", "E. Shomurodov",
-  "A. Afif", "T. Payne"
-];
-
-async function fetchJSON(url) {
-  const res = await fetch(url, { headers: HEADERS });
-  if (!res.ok) throw new Error(`API error ${res.status}: ${url}`);
-  return res.json();
-}
 
 function normalize(name) {
   return (name || "").toLowerCase()
@@ -35,17 +19,12 @@ function normalize(name) {
     .replace(/\s+/g, " ").trim();
 }
 
-function matchesSpecial(fixture) {
-  const fHome = normalize(fixture.teams.home.name);
-  const fAway = normalize(fixture.teams.away.name);
-  return SPECIAL_FIXTURES.find(s =>
-    normalize(s.home) === fHome && normalize(s.away) === fAway
+function matchesSpecial(team1, team2) {
+  const h = normalize(team1);
+  const a = normalize(team2);
+  return SPECIAL_MATCHES.find(s =>
+    normalize(s.home) === h && normalize(s.away) === a
   );
-}
-
-function isTrackedPlayer(name) {
-  const n = normalize(name);
-  return TRACKED_PLAYERS.some(p => normalize(p).split(" ").some(part => n.includes(part) && part.length > 2));
 }
 
 exports.handler = async (event) => {
@@ -53,82 +32,46 @@ exports.handler = async (event) => {
     return { statusCode: 200, headers: CORS, body: "" };
   }
 
-  const debug = event.queryStringParameters?.debug === "1";
-
   try {
-    const fixturesData = await fetchJSON(`${BASE_URL}/fixtures?league=1&season=2026`);
-    const fixtures = fixturesData.response || [];
+    const res = await fetch(WORLDCUP_JSON);
+    if (!res.ok) throw new Error(`Error fetching data: ${res.status}`);
+    const data = await res.json();
 
-    if (debug) {
-      const summary = fixtures.map(f => ({
-        id: f.fixture.id,
-        date: f.fixture.date,
-        status: f.fixture.status.short,
-        home: f.teams.home.name,
-        away: f.teams.away.name,
-        score: `${f.goals.home}-${f.goals.away}`
-      }));
-      return {
-        statusCode: 200,
-        headers: { ...CORS, "Content-Type": "application/json" },
-        body: JSON.stringify({ total: fixtures.length, fixtures: summary })
-      };
-    }
+    const results = {
+      matches: [],
+      players: {},
+      lastSync: new Date().toISOString()
+    };
 
-    const results = { matches: [], players: {}, lastSync: new Date().toISOString() };
+    const allMatches = data.matches || [];
 
-    const playedFixtures = fixtures.filter(f =>
-      ["FT", "AET", "PEN", "1H", "HT", "2H", "ET", "P"].includes(f.fixture.status.short)
-    );
+    for (const match of allMatches) {
+      const team1 = match.team1?.name || match.team1 || "";
+      const team2 = match.team2?.name || match.team2 || "";
+      const score = match.score;
 
-    for (const fixture of playedFixtures) {
-      const special = matchesSpecial(fixture);
-      if (special && fixture.goals.home !== null) {
+      const special = matchesSpecial(team1, team2);
+      if (!special) continue;
+
+      if (score && score.ft) {
         results.matches.push({
           id: special.id,
           home: special.home,
           away: special.away,
-          golesHome: fixture.goals.home,
-          golesAway: fixture.goals.away,
-          estado: "Finalizado",
-          fixtureId: fixture.fixture.id
+          golesHome: score.ft[0],
+          golesAway: score.ft[1],
+          estado: "Finalizado"
         });
-      }
-
-      const isGroup = (fixture.league.round || "").toLowerCase().includes("group");
-      if (!isGroup) continue;
-
-      const eventsData = await fetchJSON(`${BASE_URL}/fixtures/events?fixture=${fixture.fixture.id}`);
-      const events = eventsData.response || [];
-
-      for (const ev of events) {
-        const playerName = ev.player?.name;
-        if (!playerName || !isTrackedPlayer(playerName)) continue;
-        if (!results.players[playerName]) {
-          results.players[playerName] = { goles: 0, asistencias: 0, penaltis: 0, amarillas: 0, rojas: 0 };
-        }
-        const type = (ev.type || "").toLowerCase();
-        const detail = (ev.detail || "").toLowerCase();
-        if (type === "goal") {
-          if (detail.includes("penalty")) results.players[playerName].penaltis++;
-          else results.players[playerName].goles++;
-        } else if (type === "card") {
-          if (detail.includes("yellow")) results.players[playerName].amarillas++;
-          else if (detail.includes("red")) results.players[playerName].rojas++;
-        }
-        const assistName = ev.assist?.name;
-        if (assistName && type === "goal" && isTrackedPlayer(assistName)) {
-          if (!results.players[assistName]) {
-            results.players[assistName] = { goles: 0, asistencias: 0, penaltis: 0, amarillas: 0, rojas: 0 };
-          }
-          results.players[assistName].asistencias++;
-        }
       }
     }
 
     return {
       statusCode: 200,
-      headers: { ...CORS, "Content-Type": "application/json", "Cache-Control": "public, max-age=180" },
+      headers: {
+        ...CORS,
+        "Content-Type": "application/json",
+        "Cache-Control": "public, max-age=180"
+      },
       body: JSON.stringify(results)
     };
 
